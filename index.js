@@ -1,45 +1,63 @@
+module.exports = {
+  // methods
+  get app(){
+    return require('./app');
+  },
+  get font(){
+    return require('./utils/normalizeText');
+  },
+  get imageSize(){
+    return require('./utils/imageSize').default;
+  },
+  get gallery(){
+    return require('./utils/gallery');
+  },
+  get zero(){
+    return require('./utils/zero');
+  },
+  get splitStyle(){
+    return require('./utils/splitStyle').default;
+  },
+  get useInterval(){
+    return require('./utils/useInterval').default;
+  },
+  get bezier(){
+    return require('./utils/bezier').default;
+  },
 
-import {EasyNavigator, getBadge, setBadge, getLabel, setLabel} from './components/EasyNavigator';
-
-import {normalize, textMini, textSmall, textSize, textBig, textLarge} from './utils/normalizeText';
-import bezier from './utils/bezier';
-import imageSize from './utils/imageSize';
-import splitStyle from './utils/splitStyle';
-import useInterval from './utils/useInterval';
-
-
-import Cursor from './components/Cursor';
-import Countdown from './components/Countdown';
-import Resend from './components/Resend';
-import Icon from './components/Icon';
-import AutoImage from './components/AutoImage';
-import Button from './components/Button';
-import CodeInput from './components/CodeInput';
-import Empty from './components/Empty';
-import Offline from './components/Offline';
-import Parabola from './components/Parabola';
-import Confetti from './components/Confetti';
-
-
-export {
-  EasyNavigator, getBadge, setBadge, getLabel, setLabel,
-  normalize, textMini, textSmall, textSize, textBig, textLarge,
   
-  bezier,
-  imageSize,
-  splitStyle,
-  useInterval,
-
-  Cursor,
-  Countdown,
-  Resend,
-  Icon,
-  AutoImage,
-  Button,
-  CodeInput,
-  Empty,
-  Offline,
-  Parabola,
-  Confetti,
-
+  // components
+  get AutoImage(){
+    return require('./components/AutoImage').default;
+  },
+  get Button(){
+    return require('./components/Button').default;
+  },
+  get Icon(){
+    return require('./components/Icon').default;
+  },
+  get Countdown(){
+    return require('./components/Countdown').default;
+  },
+  get Empty(){
+    return require('./components/Empty').default;
+  },
+  get Offline(){
+    return require('./components/Offline').default;
+  },
+  get Parabola(){
+    return require('./components/Parabola').default;
+  },
+  get CodeInput(){
+    return require('./components/CodeInput').default;
+  },
+  get Cursor(){
+    return require('./components/Cursor').default;
+  },
+  get Resend(){
+    return require('./components/Resend').default;
+  },
+  get Confetti(){
+    return require('./components/Confetti').default;
+  },
 }

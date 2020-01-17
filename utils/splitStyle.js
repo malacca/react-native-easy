@@ -3,10 +3,8 @@ const textStyleProps = [
   'textAlign', 'textAlignVertical', 'textDecorationColor', 'textDecorationLine', 'textDecorationStyle',
   'textShadowColor', 'textShadowOffset', 'textShadowRadius', 'textTransform'
 ];
-
 /**
   分离 styles 中 Text 不支持/支持 的属性
-
   splitStyle({}) => {wrapStyle, textStyle}
  */
 export default splitStyle = (styles) => {
