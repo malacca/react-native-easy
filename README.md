@@ -13,11 +13,63 @@ Tip: 原本想直接直接安装依赖的，但发现这样搞 RN 就没办法�
 `yarn add react-native-reanimated@1.6.0 react-native-gesture-handler@1.5.3 react-native-archives@0.0.6`
 
 
+# Android
+
+[react-native-screens](https://github.com/software-mansion/react-native-screens) 的配置，安装完依赖后，修改 `android/app/build.gradle`，这两个依赖可查看 [官方文档](https://developer.android.com/jetpack/androidx/releases/appcompat?hl=zh-cn) ， 使用最新版。
+
+```
+dependencies {
+
+    // 添加 for react-native-screens
+    implementation "androidx.appcompat:appcompat:1.1.0"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-beta01"
+}
+```
+
+[react-native-gesture-handler](https://github.com/software-mansion/react-native-gesture-handler) 的配置，修改 `android/app/src/[...]/MainActivity.java`，若安装的不是指定版本，请自行查阅其文档。
+
+```diff
+package com.swmansion.gesturehandler.react.example;
+
+import com.facebook.react.ReactActivity;
++ import com.facebook.react.ReactActivityDelegate;
++ import com.facebook.react.ReactRootView;
++ import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
+
+public class MainActivity extends ReactActivity {
+
+  @Override
+  protected String getMainComponentName() {
+    return "Example";
+  }
+
++  @Override
++  protected ReactActivityDelegate createReactActivityDelegate() {
++    return new ReactActivityDelegate(this, getMainComponentName()) {
++      @Override
++      protected ReactRootView createRootView() {
++       return new RNGestureHandlerEnabledRootView(MainActivity.this);
++      }
++    };
++  }
+}
+```
+
+# iOS
+
+没有什么配置的，执行
+
+`cd ios && pod install`
+
+
 # app
 
 ```js
 import React from 'react';
 import {app} from 'react-native-easy';
+
+// 启用 screen, 减少运行时内存占用
+require('react-native-screens').useScreens();
 
 // Tab 页面
 import Index from './pages/Index';
