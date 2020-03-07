@@ -1,6 +1,6 @@
 {
   "name": "react-native-easy",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "react native components",
   "main": "index.js",
   "scripts": {
@@ -16,15 +16,6 @@
   ],
   "author": "malacca",
   "license": "MIT",
-  "dependencies": {
-    "react-native-reanimated": "^1.6.0", 
-    "react-native-screens": "^1.0.0-alpha.23",
-    "react-native-gesture-handler": "^1.5.3",
-    "react-navigation": "^4.0.10",
-    "react-navigation-stack": "^1.10.3",
-    "react-navigation-tabs": "^2.7.0",
-    "react-native-archives": "^0.0.6"
-  },
   "peerDependencies": {
     "react-native": "0.51.0"
   }

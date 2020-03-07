@@ -2,17 +2,15 @@
 
 `yarn add react-native-easy`
 
-默认会直接安装依赖，以下依赖本应该手动安装的，但因为版本问题，比如 `react-navigation` 版本，以及这个组件本身的依赖，版本不正确可能直接无法运行，或存在诸多问题，所以这里直接安装依赖。对于存量 app ，需特别注意，app 是否本来就已经安装过这些依赖来，是否存在版本冲突。
+Tip: 原本想直接直接安装依赖的，但发现这样搞 RN 就没办法编译依赖的原生层了，所以还必须要手动安装。
 
-```
-"react-native-reanimated": "^1.6.0", 
-"react-native-screens": "^1.0.0-alpha.23",
-"react-native-gesture-handler": "^1.5.3",
-"react-navigation": "^4.0.10",
-"react-navigation-stack": "^1.10.3",
-"react-navigation-tabs": "^2.7.0",
-"react-native-archives": "^0.0.6"
-```
+以下组件需要锁定版本，版本不正确可能无法运行。
+
+`yarn add react-native-screens@1.0.0-alpha.23 react-navigation@4.0.10 react-navigation-stack@1.10.3 react-navigation-tabs@2.7.0`
+
+以下依赖不确定是否要锁定版本，这里仅列一下测试时的版本，可尝试升级为最新版，看看是否能正确运行；对于存量 app ，需特别注意，app 是否本来就已经安装过这些依赖来，是否存在版本冲突。
+
+`yarn add react-native-reanimated@1.6.0 react-native-gesture-handler@1.5.3 react-native-archives@0.0.6`
 
 
 # app
