@@ -10,7 +10,7 @@ Tip: 原本想直接直接安装依赖的，但发现这样搞 RN 就没办法�
 
 以下依赖不确定是否要锁定版本，这里仅列一下测试时的版本，可尝试升级为最新版，看看是否能正确运行；对于存量 app ，需特别注意，app 是否本来就已经安装过这些依赖来，是否存在版本冲突。
 
-`yarn add react-native-reanimated@1.6.0 react-native-gesture-handler@1.5.3 react-native-archives@0.0.6`
+`yarn add react-native-reanimated@1.6.0 react-native-gesture-handler@1.5.3 react-native-archives@0.0.8`
 
 
 # Android
@@ -274,4 +274,28 @@ import {
     Cursor, Resend, Confetti
 
 } from 'react-native-easy';
+```
+
+# Icon
+
+需要设置一个名为 `iconfont` 名称的字体，可以直接在 android 包的 `assets/fonts` 中导入，也可以使用 [react-native-archives](https://github.com/malacca/react-native-archives) 加载字体（react-native-easy 本身就依赖这个组件）
+
+字体内容为 unicode 十六进制值，也可以使用字符串，内部为自动转换
+
+```js
+export default class extends Component {
+  state = {
+    icon: "&#xe677;",
+    icon2: "\ue677",
+  }
+
+  render() {
+    return (<View>
+      <Icon text={this.state.icon}/>
+      <Icon text={this.state.icon2}/>
+      <Icon text="&#xe677;"/>
+      <Icon text={"\ue624"}/>
+    </View>)
+  }
+}
 ```

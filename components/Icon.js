@@ -49,9 +49,12 @@ export default Icon = (props) => {
     }
   }
 
+  // unicode 转换
+  let unicodeText = text.startsWith('&#x') && text.endsWith(';') ? String.fromCharCode(parseInt(text.substr(3, text.length - 4), 16)) : text;
+
   // 没有绑定事件, 返回 Text 组件即可
   const iconProps = {...textProps, style};
-  const icon = animated ? <Animated.Text {...iconProps}>{text}</Animated.Text> : <Text {...iconProps}>{text}</Text>;
+  const icon = animated ? <Animated.Text {...iconProps}>{unicodeText}</Animated.Text> : <Text {...iconProps}>{unicodeText}</Text>;
   if (!onPress) {
     return icon;
   }
