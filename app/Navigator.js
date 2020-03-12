@@ -430,6 +430,7 @@ class EasyTab {
     this.TabConfig = TabConfig;
     this.TabName = TabName;
   }
+
   navigator(){
     const TabScreensList = Object.entries(this.TabScreens||{});
     if (!TabScreensList.length) {
@@ -483,11 +484,17 @@ class EasyTab {
       allowFontScaling=false,
       adaptive=false,
       labelStyle,
+      tabBarIconColor,
+      tabBarLabelColor,
       ...options
     } = tabBarOptions;
     options.adaptive = adaptive;
     options.allowFontScaling = allowFontScaling;
     TabConfig.tabBarOptions = options;
+
+    // 新增设置 icon 和 label 颜色值的回调函数
+    const getTabBarIconColor = typeof tabBarIconColor === 'function' ? tabBarIconColor : null;
+    const getTabBarLabelColor = typeof tabBarLabelColor === 'function' ? tabBarLabelColor : null;
 
     // 整理自定义 TabConfig.defaultNavigationOptions
     // 1. tabBarButtonComponent/tabBarIcon/tabBarLabel 不允许自定义
@@ -506,27 +513,29 @@ class EasyTab {
         ...customOptions,
         tabBarTestID,
         tabBarButtonComponent: TabBarWrapper,
-        tabBarIcon: ({focused}) => {
+        tabBarIcon: ({focused, tintColor}) => {
           if (focused && TabIconActive[routeName]) {
             return <Image style={styles.icon} resizeMode="contain" source={TabIconActive[routeName]} />
           }
           if (TabIcon[routeName]) {
-            return <Image style={styles.icon} resizeMode="contain" source={TabIcon[routeName]} />
+            const color = getTabBarIconColor ? getTabBarIconColor({focused, tintColor, routeName}) : (TabIconActive[routeName] ? null : tintColor);
+            return <Image style={styles.icon} resizeMode="contain" tintColor={color} source={TabIcon[routeName]} />
           }
-          return null; 
+          return null;
         },
-        tabBarLabel: ({tintColor, orientation}) => {
+        tabBarLabel: ({focused, tintColor, orientation}) => {
+          const color = getTabBarLabelColor ? getTabBarLabelColor({focused, tintColor, routeName}) : tintColor;
           return <TabBarLabelWrapper
             numberOfLines={1}
             allowFontScaling={allowFontScaling}
             style={[
               styles.label,
-              { color: tintColor },
+              {color},
               labelStyle
             ]}
             route={{tabName, routeName}}
           >{TabLabel[routeName]}</TabBarLabelWrapper>
-        }
+        },
       }
       // tabBarLabel 定义为组件了, 无障碍获取不到文字了, 若没定义, 这里手动返回 
       if (!('tabBarAccessibilityLabel' in finalOptions)) {
@@ -898,6 +907,8 @@ Navigator.stack = EasyStack;
 Navigator.tab = (TabScreens, TabConfig, TabName) => {
   return new EasyTab(TabScreens, TabConfig, TabName)
 }
+
+
 
 /**
   导出 badge label 设置/获取 函数, 

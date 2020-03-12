@@ -27,8 +27,8 @@ module.exports = {
 
   
   // components
-  get AutoImage(){
-    return require('./components/AutoImage').default;
+  get ImagePlus(){
+    return require('./components/ImagePlus').default;
   },
   get Button(){
     return require('./components/Button').default;

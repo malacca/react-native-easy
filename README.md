@@ -269,7 +269,7 @@ import {
     splitStyle, useInterval, bezier,
 
     // 组件
-    AutoImage, Button, Icon, Countdown,
+    ImagePlus, Button, Icon, Countdown,
     Empty, Offline, Parabola, CodeInput,
     Cursor, Resend, Confetti
 

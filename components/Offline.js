@@ -47,7 +47,7 @@ export default Offline = (props) => {
         <Text style={[styles.msg, c.msg ? {color:c.msg} : null]} allowFontScaling={false}>请检查网络连接后重试</Text>
     </View>
     <View style={styles.btm}>
-        {reload ? <Button title="重试" style={[styles.button, buttonStyle]} /> : null}
+        {reload ? <Button title="重试" style={[styles.button, buttonStyle]} onPress={reload}/> : null}
         {help ? <TouchableOpacity activeOpacity={.8} onPress={help} style={styles.reload}>
           <Text style={[styles.reloadText, c.help ? {color:c.help} : null]}>查看解决方案</Text>
         </TouchableOpacity> : null}
