@@ -592,8 +592,6 @@ const resetEasyHeader = (newState, prevState) => {
 }
 
 
-
-
 /**
   创建 StackNavigator
   相比原生, 重写了部分参数, 主要是重写转场动画, 可以在跳转时指定转场动画
@@ -682,45 +680,67 @@ const EasyStack = (StackScreens, StackConfig) => {
 
 
 
-
-
 /**
   js Modal 组件
   直接嵌套在 EasyApp 以便可以全局函数式调用 弹出层
 */
 let _Modal = null;
+let _ModalToastTimer = null;
+const _ModalQueues = [];
+const _ModalDefaultTime = 250;
 const _ModalDefaultAnimation = 'fade';
 const _ModalDefaultPosition = 'center';
-const _ModalDefaultTime = 250;
 class Modal extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    _Modal = {
-      open: this.open.bind(this),
-      close: this.close.bind(this)
-    }
-  }
+  _initWithoutAnimate = false;
   _config = null;
   _opacity = new Animated.Value(0);
   _animation = new Animated.Value(0);
   _aniValue = null;
   state = {
-    component:null
+    component:null,
+    changed: false,
   }
-  _reset = (cb) => {
-    this.setState({component:null})
-    this._aniValue = null;
-    this._config = null;
-    this._opacity.setValue(0);
-    this._animation.setValue(0);
-    cb && cb();
+  constructor(props) {
+    super(props);
+    _Modal = {
+      open: this.open.bind(this),
+      close: this.close.bind(this),
+      hasModal: this.hasModal.bind(this),
+    }
+    // 初始化就显示一个 component
+    // 比如可以显示 更新提醒 开屏广告等
+    const {component, config, props:initProps} = props;
+    if(!component) {
+      return;
+    }
+    const {animationTime} = config||{};
+    this._initWithoutAnimate = animationTime === 0;
+    if (this._initWithoutAnimate) {
+      this._opacity.setValue(1);
+      this._animation.setValue(1);
+    }
+    this._config = initProps;
+    this.state = {
+      component:component,
+      changed: false,
+    }
+  }
+  hasModal = () => {
+    return this.state.component !== null;
   }
   open = (component, config, props) => {
+    if (!component) {
+      return false;
+    }
+    if (_ModalToastTimer) {
+      clearTimeout(_ModalToastTimer);
+      _ModalToastTimer = null;
+    }
     config = config||{};
     config.props = props;
     this._opacity.setValue(0);
     this._config = config;
-    this.setState({component})
+    this.setState({component, changed:!this.state.changed})
     return true;
   }
   close = (time, easing) => {
@@ -765,15 +785,35 @@ class Modal extends React.PureComponent {
     })
     return true;
   }
+  _reset = (cb) => {
+    this.setState({component:null})
+    this._aniValue = null;
+    this._config = null;
+    this._opacity.setValue(0);
+    this._animation.setValue(0);
+    cb && cb();
+    // 还有正在排队的 Model
+    const nextModel = _ModalQueues.shift();
+    if (nextModel) {
+      const {component, config, props} = nextModel;
+      this.open(component, config, props);
+    }
+  }
+  // layout 后开始动效
   _show = (e) => {
+    // 首次加载且无动效
+    if (this._initWithoutAnimate) {
+      this._initWithoutAnimate = false;
+      return;
+    }
     const {
       animation=_ModalDefaultAnimation,
-      position=_ModalDefaultPosition,
       animationTime=_ModalDefaultTime,  // 动效时长
       animationEasing,    // 动效过渡函数
       onModalWillShow,    // show 之前回调
       onModalShow,        // show 之后回调
     } = this._config||{};
+    onModalWillShow && onModalWillShow();
     let startValue, toValue = 0;
     const {width, height, x, y} = e.nativeEvent.layout;
     switch (animation) {
@@ -794,7 +834,6 @@ class Modal extends React.PureComponent {
         toValue = 1;
         break;
     }
-    onModalWillShow && onModalWillShow();
     this._aniValue = startValue;
     this._animation.setValue(startValue);
     const transformAnimation = Animated.timing(this._animation, {
@@ -833,10 +872,10 @@ class Modal extends React.PureComponent {
     let alignItems, top, bottom, transform;
     if (position === 'top') {
       alignItems = 'flex-start';
-      top = offset||20;
+      top = typeof offset === 'number' ? offset : 20;
     } else if (position === 'bottom') {
       alignItems = 'flex-end';
-      bottom = offset||70;
+      bottom = typeof offset === 'number' ? offset : 70;
     } else {
       alignItems = 'center';
     }
@@ -865,6 +904,7 @@ class Modal extends React.PureComponent {
     return overlayClose ? <TouchableWithoutFeedback onPress={this.close}>{modal}</TouchableWithoutFeedback> : modal;
   }
 }
+
 // js Modal 组件 toast 应用
 class EasyToast extends React.PureComponent {
   render(){
@@ -877,37 +917,32 @@ class EasyToast extends React.PureComponent {
 }
 
 
-
-
 /**
   创建 app, 这样的好处是可以赋值给 Service , 以便全局使用导航函数
  */
-const EasyApp = (StackScreens, StackConfig, AppProps) => {
+const EasyApp = (StackScreens, StackConfig, AppProps, modal) => {
   return () => {
     const AppNavigator = createAppContainer(
       EasyStack(StackScreens, StackConfig)
     );
     return (<View style={{flex:1}}>
       <AppNavigator {...AppProps} ref={Service.setNavigator} />
-      <Modal/>
+      <Modal {...modal}/>
     </View>)
   }
 }
-
-
-const Navigator = {};
 
 /**
   导出 导航创建器  tab 函数可以在某个二级独立页面中再创建一个 tab 栈, 如
   export default tab({...sub tab screen...}, config, tabName)
   tabName 可用于后续 badge label 的设置获取, 若不指定, 则自动分配为二级页面在上级页面栈的 key 值
 */
+const Navigator = {};
 Navigator.create = EasyApp;
 Navigator.stack = EasyStack;
 Navigator.tab = (TabScreens, TabConfig, TabName) => {
   return new EasyTab(TabScreens, TabConfig, TabName)
 }
-
 
 
 /**
@@ -929,6 +964,8 @@ Navigator.setLabel = (routeName, label, tabName) => {
 
 /**
   对于使用 EasyApp 创建的, 可全局使用 modal 函数, 仅支持一次调用, 多次调用会先关闭前面的
+  可以调用 nextModal() 安全弹窗, 所设置的 modal 将会在前一个关闭后显示
+
   component: ReactCompoent
   config: {
     animation=fade|top|bottom|left|right 动效
@@ -949,6 +986,19 @@ Navigator.setLabel = (routeName, label, tabName) => {
 Navigator.modal = (component, config, props) => {
   return _Modal && _Modal.open(component, config, props);
 }
+Navigator.hasModal = () => {
+  return _Modal && _Modal.hasModal();
+}
+Navigator.nextModal = (component, config, props) => {
+  if (!_Modal) {
+    return;
+  }
+  if (_Modal.hasModal()) {
+    _ModalQueues.push({component, config, props})
+  } else {
+    Navigator.modal(component, config, props);
+  }
+}
 // modal 的一个小应用, 提示信息, timeout 后自动消失
 Navigator.toast = (msg, timeout, config) => {
   timeout = gint(timeout);
@@ -961,7 +1011,10 @@ Navigator.toast = (msg, timeout, config) => {
     overlayNone: true,
   }, {msg});
   if (timeout > 0) {
-    setTimeout(Navigator.close, timeout)
+    _ModalToastTimer = setTimeout(() => {
+      Navigator.close();
+      _ModalToastTimer = null
+    }, timeout)
   }
   return ok;
 }
