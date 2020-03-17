@@ -899,7 +899,7 @@ class Modal extends React.PureComponent {
       top,
       bottom,
     }} onLayout={this._show}>
-      <Component {...props} close={this.close} />
+      {React.isValidElement(Component) ? Component : <Component {...props} close={this.close} />}
     </Animated.View></View>
     return overlayClose ? <TouchableWithoutFeedback onPress={this.close}>{modal}</TouchableWithoutFeedback> : modal;
   }
