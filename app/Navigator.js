@@ -36,6 +36,7 @@ import Service from './Service';
 import {
   Dimensions,
   Platform, 
+  BackHandler,
   StyleSheet,
   TouchableNativeFeedback, 
   TouchableOpacity, 
@@ -696,6 +697,7 @@ class Modal extends React.PureComponent {
   _opacity = new Animated.Value(0);
   _animation = new Animated.Value(0);
   _aniValue = null;
+  _backHandle = null;
   state = {
     component:null,
     changed: false,
@@ -738,10 +740,20 @@ class Modal extends React.PureComponent {
     }
     config = config||{};
     config.props = props;
+    if (config.onback !== 'none') {
+      this._backHandle = BackHandler.addEventListener('hardwareBackPress', this._closeByBackPress);
+    }
     this._opacity.setValue(0);
     this._config = config;
     this.setState({component, changed:!this.state.changed})
     return true;
+  }
+  _closeByBackPress = () => {
+    if (this._backHandle) {
+      this._backHandle.remove();
+      this.close();
+      return !this._config || this._config.onback !== 'back';
+    }
   }
   close = (time, easing) => {
     const {
@@ -916,7 +928,6 @@ class EasyToast extends React.PureComponent {
   }
 }
 
-
 /**
   创建 app, 这样的好处是可以赋值给 Service , 以便全局使用导航函数
  */
@@ -980,6 +991,10 @@ Navigator.setLabel = (routeName, label, tabName) => {
     onModalShow=null  show 之后回调
     onModalWillClose=null  close 之前回调
     onModalClose=null  close 之后回调
+    onback="close|back|none" 弹层先后, 物理返回键点击后的响应, 默认为 close
+                            close:关闭弹层, 
+                            back:关闭弹层并返回上一页, 
+                            none:返回上一页但不关闭弹层
   }
   props: 将原样传递给所指定的 component
 */
@@ -1009,6 +1024,7 @@ Navigator.toast = (msg, timeout, config) => {
     ...config,
     overlay:'transparent',
     overlayNone: true,
+    onback: 'back',
   }, {msg});
   if (timeout > 0) {
     _ModalToastTimer = setTimeout(() => {
@@ -1022,7 +1038,8 @@ Navigator.toast = (msg, timeout, config) => {
 Navigator.loading = (color, config) => {
   return Navigator.modal(EasyToast, {
     ...config,
-    overlay:'transparent'
+    overlay:'transparent',
+    onback: 'back',
   }, {load: true, color});
 }
 // 关闭任何类型的 modal, time/easing 不设置或设置为null
