@@ -1,4 +1,3 @@
-import React from 'react';
 import {Image} from 'react-native';
 
 const cache = new Map();
@@ -28,7 +27,7 @@ const loadImage = (source, resolve, reject) => {
 }
 
 /**
-  预加载图片 获取图片尺寸
+  预加载图片 并 获取图片尺寸
 
   source: Image 组件支持的 source 格式, 如 {uri:""} , require('')
 

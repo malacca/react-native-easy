@@ -1,6 +1,5 @@
-import {NativeModules, PermissionsAndroid, AppState, Linking, Alert}  from 'react-native';
+import {NativeModules, PermissionsAndroid, Linking, Alert}  from 'react-native';
 import {dirs, external, fs, fetchPlus} from 'react-native-archives';
-import {toast} from './../app';
 
 const IsAndroid = Platform.OS === 'android';
 const {CameraRollManager, RNCCameraRoll} = NativeModules;
@@ -251,17 +250,20 @@ const saveFileCommon = (url, options, handle, type) => {
     options = {};
     handle = options;
   }
-  return saveFileWithType(url, options, type).catch(err => {
+  return saveFileWithType(url, options, type).catch(error => {
+    const msg = permissionDeniedMsg(error) ? (
+      msg === ERROR_SETTING || msg === ERROR_CANCEl ? null : Luaguage.denied
+    ) : Luaguage.failed;
     if (handle) {
-      throw err;
+      throw {
+        error,
+        msg
+      };
     }
-    const msg = permissionDeniedMsg(err);
-    if (!msg) {
-      toast(Luaguage.failed)
-    } else if (msg !== ERROR_SETTING && msg !== ERROR_CANCEl) {
-      toast(Luaguage.denied)
+    if (msg) {
+      Alert.alert(msg);
     }
-    return err;
+    return error;
   })
 }
 /**
@@ -272,11 +274,11 @@ const saveFileCommon = (url, options, handle, type) => {
 
  1. url 可以是 本地文件[file:///data/ || /data/] 远程文件[https://]  对于图片还支持 Base64[data:]
  2. options 可设置 {saveName:String, saveExt:String} 
-    saveName 默认为时间戳
-    saveExt  默认从 url 中提取, 若 url 中不含文件后缀, 则建议手动设置, 否则将自动 photo(jpg) / video(mp4) / auto(none)
+      saveName: 默认为时间戳
+      saveExt:  默认从 url 中提取, 若 url 中不含文件后缀, 则建议手动设置, 否则将自动 photo(jpg) / video(mp4) / auto(none)
     对于 url 为远程文件的, options 还可额外设置 react-native-archives fetchPlus options, 请查询其文档(如更改临时保存路径/监听下载进度)
 
- 3. 若直接 saveFile(url, (Bool)handler) 代表不使用 options
+ 3. 可直接 saveFile(url, (Bool)handler) 代表不使用 options
  4. handle:Bool  是否手动处理错误消息, 默认为 false, 若手动处理, 对于返回的 promise 需手动 catch
  5. handle=false then() 参数在保存成功的情况下为 {type, saveName, saveExt, dest}, 失败的情况下为 Error
 */

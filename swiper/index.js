@@ -15,9 +15,13 @@ const {
  * 修改自 react-native-swiper
  * 移除了 button / title 组件, 删除了一些多余代码, 优化性能
  * 
- * The MIT License (MIT)
- * Copyright (c) 2015 斯人
- * @author leecade<leecade@163.com>
+ * <Swiper {...props}>
+ *    <View />
+ *    <View />
+ * </Swiper>
+ * 
+ * 
+ * 
  */
 export default class extends Component {
 
@@ -94,9 +98,47 @@ export default class extends Component {
 
   autoplayEnd = false;
   autoplayTimer = null;
-  state = this.initState({}, true);
+  state = this._initState({}, true);
 
-  initState(state, init) {
+  componentDidMount() {
+    this._startAutoplay()
+  }
+
+  componentDidUpdate(prevProps) {
+    // 若 props.horizontal 或 props.index 变化, 更新 state
+    const props = this.props;
+    const indexChange = props.index !== prevProps.index;
+    if (indexChange || props.horizontal !== prevProps.horizontal) {
+      this._initState({...this.state, index: indexChange ? props.index : this.state.index})
+    }
+    if (props.autoplay !== prevProps.autoplay) {
+      this.autoplayTimer && clearTimeout(this.autoplayTimer);
+      if (props.autoplay) {
+        this._startAutoplay()
+      }
+    } 
+  }
+
+  componentWillUnmount() {
+    this.autoplayTimer && clearTimeout(this.autoplayTimer)
+  }
+  
+  // 获取当前 state
+  fullState() {
+    return Object.assign({}, this.state, this.internals)
+  }
+
+  // 外部可用的接口, 切换到 index
+  scrollTo = (index, animated = true) => {
+    const total = this.state.total;
+    if (total < 2) {
+      return;
+    }
+    index = Math.max(0, Math.min(index, total - 1));
+    this._scrollBy(index, animated);
+  }
+
+  _initState = (state, init) => {
     const props = this.props;
     const newState = {};
     let resetScroll = false;
@@ -161,39 +203,12 @@ export default class extends Component {
     return newState
   }
 
-  fullState() {
-    return Object.assign({}, this.state, this.internals)
-  }
-
-  onLayout = event => {
+  _onLayout = event => {
     const {width, height} = event.nativeEvent.layout;
-    this.initState({...this.state, width, height})
+    this._initState({...this.state, width, height})
   }
 
-  componentDidMount() {
-    this.startAutoplay()
-  }
-
-  componentDidUpdate(prevProps) {
-    // 若 props.horizontal 或 props.index 变化, 更新 state
-    const props = this.props;
-    const indexChange = props.index !== prevProps.index;
-    if (indexChange || props.horizontal !== prevProps.horizontal) {
-      this.initState({...this.state, index: indexChange ? props.index : this.state.index})
-    }
-    if (props.autoplay !== prevProps.autoplay) {
-      this.autoplayTimer && clearTimeout(this.autoplayTimer);
-      if (props.autoplay) {
-        this.startAutoplay()
-      }
-    } 
-  }
-
-  componentWillUnmount() {
-    this.autoplayTimer && clearTimeout(this.autoplayTimer)
-  }
-
-  startAutoplay = () => {
+  _startAutoplay = () => {
     if (
       this.internals.isScrolling ||
       this.autoplayEnd || 
@@ -203,20 +218,20 @@ export default class extends Component {
       return;
     }
     this.autoplayTimer && clearTimeout(this.autoplayTimer);
-    this.autoplayTimer = setTimeout(this.runAutoPlay, this.props.autoplayTimeout)
+    this.autoplayTimer = setTimeout(this._runAutoPlay, this.props.autoplayTimeout)
   }
 
-  runAutoPlay = () => {
+  _runAutoPlay = () => {
     if (!this.props.loop && (
       this.props.autoplayDirection ? this.state.index === this.state.total - 1 : this.state.index === 0
     )) {
       this.autoplayEnd = true;
     } else {
-      this.scrollBy(this.state.index + (this.props.autoplayDirection ? 1 : -1))
+      this._scrollBy(this.state.index + (this.props.autoplayDirection ? 1 : -1))
     }
   }
 
-  scrollBy = (index, animated = true) => {
+  _scrollBy = (index, animated = true) => {
     const state = this.state;
     if (this.internals.isScrolling || state.total < 2 || index === state.index) {
       return;
@@ -236,7 +251,7 @@ export default class extends Component {
     // onMomentumScrollEnd 回调, 这里主动调用
     if (!animated || Platform.OS !== 'ios') {
       requestAnimationFrame(() => {
-        this.onMomentumScrollEnd({
+        this._onMomentumScrollEnd({
           nativeEvent: {
             position: diff
           }
@@ -245,21 +260,11 @@ export default class extends Component {
     }
   }
 
-  // 给外提供的接口, 切换到 index
-  scrollTo = (index, animated = true) => {
-    const total = this.state.total;
-    if (total < 2) {
-      return;
-    }
-    index = Math.max(0, Math.min(index, total - 1));
-    this.scrollBy(index, animated);
-  }
-
-  renderScrollView = pages => {
+  _renderScrollView = pages => {
     const {contentContainerStyle, ...scrollViewProps} = this.props.scrollViewProps||{};
     return (
       <ScrollView
-        ref={this.refScrollView}
+        ref={this._refScrollView}
         {...scrollViewProps}
         contentContainerStyle={[styles.swiper, contentContainerStyle]}
         horizontal={this.props.horizontal}
@@ -270,27 +275,27 @@ export default class extends Component {
         bounces={false}
         scrollsToTop={false}
         automaticallyAdjustContentInsets={false}
-        onScrollBeginDrag={this.onScrollBeginDrag}
-        onScrollEndDrag={this.onScrollEndDrag}
-        onMomentumScrollEnd={this.onMomentumScrollEnd}
+        onScrollBeginDrag={this._onScrollBeginDrag}
+        onScrollEndDrag={this._onScrollEndDrag}
+        onMomentumScrollEnd={this._onMomentumScrollEnd}
       >
         {pages}
       </ScrollView>
     )
   }
   
-  refScrollView = view => {
+  _refScrollView = view => {
     this.scrollView = view
   }
 
-  onScrollBeginDrag = e => {
+  _onScrollBeginDrag = e => {
     this.internals.isScrolling = true;
     this.props.scrollViewProps && 
     this.props.scrollViewProps.onScrollBeginDrag &&
     this.props.scrollViewProps.onScrollBeginDrag(e);
   }
 
-  onScrollEndDrag = e => {
+  _onScrollEndDrag = e => {
     const {horizontal} = this.props;
     const {offset} = this.internals;
     const {contentOffset} = e.nativeEvent;
@@ -308,7 +313,7 @@ export default class extends Component {
     this.props.scrollViewProps.onScrollEndDrag(e);
   }
 
-  onMomentumScrollEnd = e => {
+  _onMomentumScrollEnd = e => {
     this.internals.isScrolling = false;
     // 不是 scrollView 的事件触发, 而是 scrollTo 触发的
     if (!e.nativeEvent.contentOffset) {
@@ -332,7 +337,7 @@ export default class extends Component {
 
     // 拖拽了一下, 没到切换位置, 又弹回原位了
     if (!diff) {
-      this.afterMomentumScrollEnd(e);
+      this._afterMomentumScrollEnd(e);
       return;
     }
 
@@ -369,20 +374,20 @@ export default class extends Component {
           });
         }
       }
-      this.afterMomentumScrollEnd(e);
+      this._afterMomentumScrollEnd(e);
     })
   }
   
-  afterMomentumScrollEnd = e => {
+  _afterMomentumScrollEnd = e => {
     this.props.onIndexChanged(this.state.index);
-    this.startAutoplay();
+    this._startAutoplay();
     this.props.scrollViewProps && 
     this.props.scrollViewProps.onMomentumScrollEnd &&
     this.props.scrollViewProps.onMomentumScrollEnd(e);
   }
 
   // 两个以上子组件, 绘制小圆点
-  renderPagination = () => {
+  _renderPagination = () => {
     if (this.state.total <= 1) {
         return null
     }
@@ -472,11 +477,11 @@ export default class extends Component {
       )
     }
     return (
-      <View style={[styles.container, style]} onLayout={this.onLayout}>
-        {this.renderScrollView(pages)}
+      <View style={[styles.container, style]} onLayout={this._onLayout}>
+        {this._renderScrollView(pages)}
         {showsPagination && (renderPagination
             ? renderPagination(index, total, this)
-            : this.renderPagination()
+            : this._renderPagination()
         )}
       </View>
     )
@@ -484,39 +489,39 @@ export default class extends Component {
 }
 
 const styles = {
-    // 容器
-    container: {
-      backgroundColor: 'transparent',
-      position: 'relative',
-      flex: 1
-    },
-    swiper: {
-      backgroundColor: 'transparent'
-    },
-    item: {
-      backgroundColor: 'transparent'
-    },
-    // 小圆点
-    pagination_x: {
-      position: 'absolute',
-      bottom: 25,
-      left: 0,
-      right: 0,
-      flexDirection: 'row',
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'transparent'
-    },
-    pagination_y: {
-      position: 'absolute',
-      right: 15,
-      top: 0,
-      bottom: 0,
-      flexDirection: 'column',
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'transparent'
-    },
+  // 容器
+  container: {
+    backgroundColor: 'transparent',
+    position: 'relative',
+    flex: 1
+  },
+  swiper: {
+    backgroundColor: 'transparent'
+  },
+  item: {
+    backgroundColor: 'transparent'
+  },
+  // 小圆点
+  pagination_x: {
+    position: 'absolute',
+    bottom: 25,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent'
+  },
+  pagination_y: {
+    position: 'absolute',
+    right: 15,
+    top: 0,
+    bottom: 0,
+    flexDirection: 'column',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent'
+  },
 }
