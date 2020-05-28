@@ -14,7 +14,7 @@ import {Platform, Keyboard, StyleSheet, TextInput, View, Text} from 'react-nativ
   <CodeInput 
     style,     // 包裹 items 的外层组件样式
     length=6,  // 个数
-    size=24,   // 字体大小
+    size=28,   // 字体大小
 
     cursorColor,    // 光标颜色
     cursorRate=500, // 光标频率
@@ -216,7 +216,7 @@ export default class CodeInput extends React.PureComponent {
     const {
       style,
       length=6,
-      size=24,
+      size=28,
 
       cursorColor,
       cursorRate,

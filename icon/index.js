@@ -13,10 +13,9 @@ import {Animated, Text} from 'react-native';
 */
 
 function unicode(text) {
-  if (!text) {
-    return text;
-  }
-  return text.startsWith('&#x') && text.endsWith(';') ? String.fromCharCode(parseInt(text.substr(3, text.length - 4), 16)) : text;
+  return text ? text.replace(/&#x(\w+);/g, (s, icon) => {
+    return String.fromCharCode(parseInt(icon, 16))
+  }) : text;
 }
 
 function Icon(props) {

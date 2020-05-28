@@ -289,25 +289,24 @@ const styles = StyleSheet.create({
   box:{
     overflow:"hidden",
     width: screenWidth - 90,
+    alignSelf:"center",
     paddingBottom:20,
     backgroundColor:"#fff",
     borderRadius:6,
     elevation:3,
-
-    marginLeft:30,
-    marginTop:40,
   },
   title:{
     paddingVertical:12,
     textAlign:"center",
     backgroundColor:"#2196F3",
-    color:"#fff"
+    color:"#fff",
+    fontSize:fontSize.big,
   },
   desc:{
     marginHorizontal:20,
     marginVertical:15,
-    fontSize:fontSize.small,
-    lineHeight:fontSize.small * 1.8,
+    fontSize:fontSize.size,
+    lineHeight:fontSize.size * 1.8,
     color:"#666",
   },
   donwload:{
@@ -318,7 +317,7 @@ const styles = StyleSheet.create({
     overflow:"hidden",
   },
   donwloadTxt:{
-    fontSize:fontSize.size,
+    fontSize:fontSize.big,
     textAlign:"center",
   },
   progress:{

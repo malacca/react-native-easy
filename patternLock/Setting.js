@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   reset:{
     alignSelf:"stretch",
     textAlign:"center",
-    marginTop: 30,
+    marginTop: 40,
     color:"#409EFF",
   },
 });

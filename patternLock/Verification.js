@@ -2,6 +2,7 @@ import React from "react";
 import {StyleSheet, View, Animated} from "react-native";
 import Color from 'art/core/color';
 import PatternLock from './index';
+import fontSize from './../utils/fontSize';
 
 /**
  * 验证解锁图案
@@ -198,7 +199,8 @@ const styles = StyleSheet.create({
   message:{
     alignSelf:"stretch",
     textAlign:"center",
-    marginBottom:20,
+    marginBottom:30,
+    fontSize: fontSize.big,
   },
   patternLock:{
     alignSelf:"stretch",

@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, Animated, View, ScrollView} from 'react-native';
 import {ViewPager} from 'react-native-viewpager-list';
 import createEvent from './../utils/createEvent';
+import fontSize from './../utils/fontSize';
 import Button from './../button';
 
 const AnimatedViewPager = Animated.createAnimatedComponent(ViewPager);
@@ -99,6 +100,7 @@ function TopTabView(props) {
     onPageScroll,
     onPageChanged,
     offscreenPageLimit,
+    onPageScrollStateChanged,
     ...pageProps
   } = pageOptions||{};
 
@@ -120,12 +122,16 @@ function TopTabView(props) {
 
   const scrollViewRef = React.useRef();
   const pagerViewRef = React.useRef();
-  const barLayouts = React.useRef();
   const labelLayouts = React.useRef();
   const underLineTransform = React.useRef();
   const scrollPosition = React.useRef(new Animated.Value(0));
   const scrollPositionValue = scrollPosition.current;
-
+  const cacheRef = React.useRef({
+    tabBarWidth:0,
+    pageStatus:0,
+  });
+  const cacheStore = cacheRef.current;
+  
   const pagerLoaded = React.useRef([]);
   const lastIndexRef = React.useRef(-1);
   const curIndexRef = React.useRef(-1);
@@ -249,7 +255,7 @@ function TopTabView(props) {
   
   // TabBar 渲染后记录其宽度, 在 scrollable 的情况下设置 scrollView 居中
   const tabBarLayout = (e) => {
-    barLayouts.current = e.nativeEvent.layout.width;
+    cacheStore.tabBarWidth = e.nativeEvent.layout.width;
     updateScrollOffset(realCurrentIndex, true);
   }
   
@@ -301,7 +307,7 @@ function TopTabView(props) {
     if (!scrollable) {
       return;
     }
-    const width = barLayouts.current;
+    const width = cacheStore.tabBarWidth;
     const layouts = labelLayouts.current;
     if (!width || !layouts) {
       return;
@@ -383,6 +389,14 @@ function TopTabView(props) {
     if (onPageScroll) {
       pageScrollConfig.listener = onPageScroll;
     }
+    const onPageStateChange = (e) => {
+      cacheStore.pageStatus = e.state;
+      onPageScrollStateChanged && onPageScrollStateChanged(e);
+    }
+    const onMoveShouldSetResponderCapture = () => {
+      return cacheStore.pageStatus !== 0;
+    }
+
     return <View style={[styles.container, style]}>
       <AnimatedViewPager 
         {...pageProps}
@@ -396,6 +410,8 @@ function TopTabView(props) {
           [{nativeEvent: { totalOffset: scrollPositionValue} }],
           pageScrollConfig
         )}
+        onPageScrollStateChanged={onPageStateChange}
+        onMoveShouldSetResponderCapture={onMoveShouldSetResponderCapture}
       >
         {tabs.map(renderScreen)}
       </AnimatedViewPager>
@@ -525,8 +541,9 @@ const getAnimateStyleRange = (tabs, colors, positionValue) => {
 
 const tabBaseStyle = {
   borderRadius:0,
+  paddingVertical:10,
   backgroundColor: 'transparent',
-  fontSize:12,
+  fontSize:fontSize.size,
 };
 const styles = StyleSheet.create({
   container:{
@@ -546,8 +563,9 @@ const styles = StyleSheet.create({
     backgroundColor:"rgb(33,150,243)",
     position:"absolute",
     left:0,
-    bottom:0,
-    height:1,
+    bottom:4,
+    height:2,
+    borderRadius:2,
   }
 });
 

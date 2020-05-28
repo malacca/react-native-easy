@@ -271,14 +271,14 @@ const styles = StyleSheet.create({
     flexGrow : 1,
   },
   permItem:{
-    padding:10,
+    padding:15,
     marginVertical:5,
-    borderRadius:6,
+    borderRadius:8,
     borderWidth: StyleSheet.hairlineWidth,
     opacity: .65,
   },
   permItemChecked:{
-    padding: 10 + StyleSheet.hairlineWidth - 2,
+    padding: 15 + StyleSheet.hairlineWidth - 2,
     borderWidth: 2,
     opacity: .85,
   },
@@ -328,6 +328,8 @@ const styles = StyleSheet.create({
   },
   enter:{
     marginTop:14,
+    paddingVertical:12,
+    borderRadius:8,
   },
 
   box:{

@@ -47,12 +47,15 @@ function Screen(props) {
   );
 
   const {mode, background} = Screen.setCurrentStatus(status);
-  return mode === 1 ? <View style={{flex:1}}>
+  return mode === 1 ? <View style={{
+    flex:1, 
+    flexDirection:"column-reverse"
+  }}>
+    <View style={{flex:1}}>{children}</View>
     <View style={{
       height:StatusBar.currentHeight,
       backgroundColor:background
     }}/>
-    {children}
   </View> : children;
 };
 
